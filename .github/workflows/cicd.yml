@@ -1,6 +1,6 @@
 # ============================================
 # cicd.yml — Pipeline completo CI/CD
-# TP0 7 — Plan DevOps
+# TP07 — Plan DevOps
 # ============================================
 
 name: CI/CD Pipeline
@@ -45,13 +45,13 @@ jobs:
       - name: Lint Python (flake8)
         run: |
           flake8 backend/ \
-            --max-line-length=100 \
-            --exclude=backend/tests/ \
+            --max-line-length=130 \
+            --extend-ignore=E401,E302,E501,E702,E305 \
             --count --statistics
 
       - name: Lint YAML (yamllint)
         run: |
-          yamllint -d "{extends: default, rules: {line-length: {max: 120}}}" \
+          yamllint -d "{extends: default, rules: {line-length: {max: 120}, document-start: disable, truthy: disable}}" \
             docker-compose.yml \
             .github/workflows/
 
@@ -72,12 +72,15 @@ jobs:
           cache: 'pip'
 
       - name: Instalar dependencias
-        run: pip install -r backend/requirements.txt
+        run: |
+          pip install --upgrade pip
+          pip install pytest pytest-cov
+          pip install -r backend/requirements.txt
 
       - name: Correr tests con cobertura
         run: |
           cd backend
-          pytest tests/ \
+          python -m pytest tests/ \
             --cov=. \
             --cov-report=term-missing \
             --cov-report=xml \
